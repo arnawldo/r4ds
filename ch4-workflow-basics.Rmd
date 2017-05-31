@@ -1,0 +1,43 @@
+---
+title: "Chapter 4: Workflow Basics"
+output: html_notebook
+---
+
+## Coding basics
+
+R as a calculator
+```{r}
+1 / 500 * 100
+(5 - 3) / 2
+sin(pi / 2)
+```
+
+Assignment
+```{r}
+x <- 3 * 4
+```
+
+## What's in a name?
+
+```{r}
+x
+this_is_a_very_long_name <- 5
+
+```
+
+## Calling functions
+
+```{r}
+seq(1, 10)
+```
+
+```{r}
+y <- seq(1, 10)
+y
+```
+
+Assign and print out
+```{r}
+(y <- seq(1, 10, length.out = 5))
+```
+
