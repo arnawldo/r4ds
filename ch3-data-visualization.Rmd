@@ -1,0 +1,196 @@
+---
+title: "Chapter 3: Data Visualization"
+output: html_notebook
+---
+
+Load the tidyverse package
+```{r}
+library(tidyverse)
+```
+
+
+## First steps
+
+Do cars with big engines use more fuel than cars with small engines?
+
+```{r}
+# mpg dataset
+mpg
+# plot hwy against displ
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy))
+```
+
+```{r}
+ggplot(data = mpg)
+# rows mpg
+dim(mpg)
+# hwy vs cyl
+ggplot(data = mpg) + geom_point(mapping = aes(x = cyl, y = hwy))
+# class vs drv
+ggplot(data = mpg) + geom_point(mapping = aes(x = drv, y = class))
+
+```
+
+## Aesthetic mappings
+```{r}
+# hwy vs displ coloured by class
+ggplot(data = mpg) + geom_point(mapping = aes(x = displ, y = hwy, colour = class))
+```
+
+Mapping class to the alpha and shape aesthetic
+```{r}
+# alpha
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy, alpha = class))
+# shape
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy, shape = class))
+```
+
+Manually change aesthetic
+```{r}
+ggplot(data = mpg) + geom_point(mapping = aes(x = displ, y = hwy), colour = 'blue')
+```
+
+Mapping continous variable to colour
+```{r}
+ggplot(data = mpg) + geom_point(mapping = aes(x = displ, y = hwy, colour = cty))
+```
+
+Mapping continous variable to shape
+```{r}
+ggplot(data = mpg) + geom_point(mapping = aes(x = displ, y = hwy, shape = cty))
+```
+
+Stroke aesthetic
+```{r}
+ggplot(data = mpg) + geom_point(mapping = aes(x = displ, y = hwy, stroke = cty))
+```
+
+Mapping boolean to aesthetic
+```{r}
+ggplot(data = mpg) + geom_point(mapping = aes(x = displ, y = hwy, colour = cty > 15))
+```
+
+## Facets
+
+```{r}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy)) +
+  facet_wrap(~ class, nrow = 2)
+```
+
+Facet by 2 variables
+```{r}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy)) +
+  facet_wrap(drv ~ cyl)
+```
+
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) +
+  facet_grid(. ~ drv)
+```
+
+
+Facet on continous variable
+```{r}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy)) +
+  facet_wrap(~ cty)
+```
+
+## Geometric objects
+
+Line geometric object
+```{r}
+ggplot(data = mpg) +
+  geom_smooth(mapping = aes(x = displ, y = hwy))
+```
+
+Mapping drv to linetype aesthetic
+```{r}
+ggplot(data = mpg) + 
+  geom_smooth(mapping = aes(x = displ, y = hwy, linetype = drv))
+```
+
+Adding points coloured by drv
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy, colour = drv)) +
+  geom_smooth(mapping = aes(x = displ, y = hwy, linetype = drv, colour = drv))
+```
+
+Using `group` to draw multiple rows of data
+```{r}
+ggplot(data = mpg) +
+  geom_smooth(mapping = aes(x = displ, y = hwy, group = drv))
+```
+
+Adding multiple geoms 
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) +
+  geom_smooth(mapping = aes(x = displ, y = hwy))
+```
+
+Same as above, but using global mapping
+```{r}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) +
+  geom_point() +
+  geom_smooth()
+```
+
+Using local mappings to extend or overwritw global mapping
+```{r}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) +
+  geom_point(mapping = aes(colour = class)) +
+  geom_smooth()
+```
+
+Use subset of data for `geom_smooth` only
+```{r}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+  geom_point(mapping = aes(color = class)) + 
+  geom_smooth(data = filter(mpg, class == "subcompact"), se = FALSE)
+```
+
+Recreate charts in exercise 3.6.1
+```{r}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) +
+  geom_point() +
+  geom_smooth(se = FALSE)
+
+```
+
+```{r}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) +
+  geom_point() +
+  geom_smooth(mapping = aes(group = drv), se = FALSE)
+```
+
+```{r}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy, colour = drv)) +
+  geom_point() +
+  geom_smooth(se = FALSE)
+```
+
+```{r}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) +
+  geom_point(mapping = aes(colour = drv)) +
+  geom_smooth(se = FALSE)
+```
+
+```{r}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) +
+  geom_point(mapping = aes(colour = drv)) +
+  geom_smooth(mapping = aes(linetype = drv), se = FALSE)
+```
+
+```{r}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) +
+  geom_point(mapping = aes(fill = drv), shape = 21, colour = "white", size = 4, stroke = 2)
+```
+
