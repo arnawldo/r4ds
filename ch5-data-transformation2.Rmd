@@ -1,0 +1,437 @@
+---
+title: "Chapter 5: Data Transformation"
+author: "Arnold Taremwa"
+date: "31 May 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Prerequisites
+
+```{r}
+library(nycflights13)
+library(tidyverse)
+```
+
+Base R functions have been overwritten. To access them, use full names: `stats::filter()`, `stats::lag()`
+
+## nycflights13
+
+```{r}
+flights
+```
+
+## Filter row with filter()
+
+All flights on Jan 1st
+```{r}
+filter(flights, month == 1, day == 1)
+```
+
+Save result in variable
+
+```{r}
+(dec25 <-  filter(flights, month == 12, day == 25))
+```
+
+## Comparisons
+
+== / =
+
+```{r}
+# error
+#filter(flights, month = 1)
+```
+
+Beware floating point numbers
+```{r}
+sqrt(2) ^ 2 == 2
+```
+
+```{r}
+1 / 49 * 49 == 1
+```
+
+Use near instead
+
+```{r}
+near(sqrt(2) ^ 2, 2)
+```
+
+```{r}
+near(1 / 49 * 49, 1)
+```
+
+## Logical Operators
+
+Multiple arguements to filter are combined with `and`.
+
+Find all flights departed in November or December
+
+```{r}
+filter(flights, month == 11 | month == 12)
+```
+
+Using `%in%` for same results
+
+```{r}
+(nov_dec <- filter(flights, month %in% c(11, 12)))
+```
+
+Using De Morgan's law to simplify complicated subsetting: `!(x & y)` same as `!x | !y` and `!(x | y)` same as `!x & !y`
+
+```{r}
+filter(flights, !(arr_delay > 120 | dep_delay > 120))
+filter(flights, arr_delay <= 120, dep_delay <= 120)
+```
+
+## Missing values
+
+```{r}
+NA > 10
+NA == 2
+NA * 4
+NA == NA
+```
+Check if value is missing
+```{r}
+x <- NA
+is.na(x)
+```
+
+`filter()` only includes rows evaluated with `TRUE`, excludes both `FALSE` and `NA`
+
+```{r}
+df <- tibble(x = c(1, NA, 3, 4))
+filter(df, x > 2)
+```
+
+Explicitly include NA
+
+```{r}
+filter(df, is.na(x) | x > 2)
+```
+
+## 5.2.4 Exercises
+
+Flights that had an arrival delay of two or more hours
+
+```{r}
+filter(flights, arr_delay >= 2)
+```
+
+Flights that flew to Houston
+```{r}
+filter(flights, dest %in% c("IAH", "HOU"))
+```
+
+Flights that were operated by United, American or Delta
+
+```{r}
+filter(flights, carrier %in% c("UA", "AA", "DL"))
+```
+
+Departed in summer (July, August, September)
+
+```{r}
+filter(flights, month %in% c(7, 8, 9))
+```
+
+Arrived more than 2 hours late but didnt leave late
+
+```{r}
+filter(flights, arr_delay > 2, dep_delay <= 0)
+```
+
+Delayed by at least one hour, but made up over 30 minutes in flight
+```{r}
+
+```
+
+Departed between midnight and 6am
+
+```{r}
+filter(flights, dep_time >= 0, dep_time <= 600)
+```
+
+Use `dplyr`'s `between` to replicate above results
+
+Departed between midnight and 6am
+```{r}
+filter(flights, between(dep_time, 0, 600))
+```
+
+How many flights with missing `dep_time`
+
+```{r}
+filter(flights, is.na(dep_time))
+```
+
+Other variables with NA
+
+```{r}
+colSums(is.na(flights))
+```
+
+## Arange rows with `arrange()`
+
+```{r}
+arrange(flights, year, month, day)
+```
+
+Descending order
+
+```{r}
+arrange(flights, desc(arr_delay))
+```
+
+NA is always sorted at the end
+
+```{r}
+df <- tibble(x = c(3, 2, NA))
+arrange(df, x)
+arrange(df, desc(x))
+```
+
+## 5.3.1 Exercises
+
+Sort NA to the top
+```{r}
+arrange(df, desc(is.na(x)))
+```
+
+Most delayed flights
+
+```{r}
+arrange(flights, desc(dep_delay))
+```
+
+Earliest departures
+
+```{r}
+arrange(flights, dep_delay)
+```
+
+Fastest flights
+
+```{r}
+arrange(flights, air_time)
+```
+
+Longest flights
+
+```{r}
+arrange(flights, desc(distance))
+```
+
+Shortest flights
+
+```{r}
+arrange(flights, distance)
+```
+
+## 5.4 Select columns with `select`
+
+Select by name
+
+```{r}
+select(flights, year, month, day)
+```
+
+Select by range (inclusive)
+```{r}
+select(flights, year:day)
+```
+
+Select all columns except these
+
+```{r}
+select(flights, -(year:day))
+```
+
+Starts with
+
+```{r}
+select(flights, starts_with("dep"))
+```
+
+Ends with
+
+```{r}
+select(flights, ends_with("time"))
+```
+
+Contains
+
+```{r}
+select(flights, contains("arr"))
+```
+
+Matches regex
+
+```{r}
+select(flights, matches("[a-z]+_[a-z]+"))
+```
+
+Number range `num_range("x", 1:3)` matches x1, x2, x3
+
+Rename columns
+
+```{r}
+rename(flights, this_year = year)
+```
+
+Everything helper
+
+```{r}
+select(flights, time_hour, air_time, everything())
+```
+
+## 5.4.1 Exercises
+
+Select dep_time, dep_delay, arr_time, and arr_delay from flights.
+```{r}
+select(flights, starts_with("dep"), starts_with("arr"))
+```
+
+```{r}
+select(flights, dep_time, dep_delay, arr_time, arr_delay)
+```
+
+```{r}
+select(flights, matches("dep_[a-z]+"), matches("arr_[a-z]+"))
+```
+
+Including variable name multiple times
+
+```{r}
+select(flights, dep_time, dep_time)
+```
+
+`one_of` helper function
+
+```{r}
+vars <- c("year", "month", "day", "dep_delay", "arr_delay")
+
+select(flights, one_of(vars))
+```
+
+`contains` helper
+
+```{r}
+select(flights, contains("TIME"))
+```
+
+## Add new variables with mutate()
+
+```{r}
+flights_sml <- select(flights, 
+  year:day, 
+  ends_with("delay"), 
+  distance, 
+  air_time
+)
+mutate(flights_sml,
+  gain = arr_delay - dep_delay,
+  speed = distance / air_time * 60
+)
+```
+
+Refer to newly created columns
+
+```{r}
+mutate(flights_sml,
+       gain = arr_delay - dep_delay,
+       hours = distance / air_time * 60,
+       gain_per_hour = gain / hours
+       )
+```
+
+To keep new columns, use `transmute`
+
+```{r}
+transmute(flights, 
+          gain = arr_delay - dep_delay,
+          hours = distance / air_time * 60,
+          gain_per_hour = gain / hours
+          )
+```
+
+## Useful creation functions
+
+Modular arithmetic
+
+```{r}
+transmute(flights,
+  dep_time,
+  hour = dep_time %/% 100,
+  minute = dep_time %% 100
+)
+```
+
+Logs: `log()`, `log2()`, `log10()`
+
+Offsets: lead() and lag()
+
+```{r}
+(x <- 1:10)
+lag(x)
+lead(x)
+```
+
+Cumulative and rolling packages
+
+```{r}
+x
+cumsum(x)
+cummean(x)
+```
+
+Logical Comparisons
+
+Ranking
+
+```{r}
+y <- c(1, 2, 3, NA, 3, 4)
+
+min_rank(y)
+
+min_rank(desc(y))
+
+row_number(y)
+
+dense_rank(y)
+
+percent_rank(y)
+
+cume_dist(y)
+```
+
+## 5.5.2 Exercises
+
+Convert `dep_time` and `sched_dep_time` to more convinient representation of number of minutes since midnight
+
+```{r}
+transmute(flights, 
+          dep_time_minutes = ((dep_time %/% 100) * 60) + (dep_time %% 100),
+          sched_dep_time_minutes = ((sched_dep_time %/% 100) * 60) + (sched_dep_time %% 100))
+```
+
+Compare air_time with arr_time - dep_time
+
+```{r}
+transmute(flights,
+          air_time,
+          calc_air_time = arr_time - dep_time)
+```
+
+
+10 most delayed flights using ranking
+
+```{r}
+arrange(flights, min_rank(desc(dep_delay)))
+```

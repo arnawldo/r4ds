@@ -1,0 +1,129 @@
+---
+title: "Chapter 5: Data transformation"
+output: html_notebook
+---
+
+## Prerequisites
+
+```{r}
+library(nycflights13)
+library(tidyverse)
+```
+
+Base R functions have been overwritten. To access them, use full names: `stats::filter()`, `stats::lag()`
+
+## nycflights13
+
+```{r}
+flights
+```
+
+## Filter row with filter()
+
+All flights on Jan 1st
+```{r}
+filter(flights, month == 1, day == 1)
+```
+
+Save result in variable
+
+```{r}
+(dec25 <-  filter(flights, month == 12, day == 25))
+```
+
+## Comparisons
+
+== / =
+
+```{r}
+filter(flights, month = 1)
+```
+
+Beware floating point numbers
+```{r}
+sqrt(2) ^ 2 == 2
+```
+
+```{r}
+1 / 49 * 49 == 1
+```
+
+Use near instead
+
+```{r}
+near(sqrt(2) ^ 2, 2)
+```
+
+```{r}
+near(1 / 49 * 49, 1)
+```
+
+## Logical Operators
+
+Multiple arguements to filter are combined with `and`.
+
+Find all flights departed in November or December
+
+```{r}
+filter(flights, month == 11 | month == 12)
+```
+
+Using `%in%` for same results
+
+```{r}
+(nov_dec <- filter(flights, month %in% c(11, 12)))
+```
+
+Using De Morgan's law to simplify complicated subsetting: `!(x & y)` same as `!x | !y` and `!(x | y)` same as `!x & !y`
+
+```{r}
+filter(flights, !(arr_delay > 120 | dep_delay > 120))
+filter(flights, arr_delay <= 120, dep_delay <= 120)
+```
+
+## Missing values
+
+```{r}
+NA > 10
+NA == 2
+NA * 4
+NA == NA
+```
+Check if value is missing
+```{r}
+x <- NA
+is.na(x)
+```
+
+`filter()` only includes rows evaluated with `TRUE`, excludes both `FALSE` and `NA`
+
+```{r}
+df <- tibble(x = c(1, NA, 3, 4))
+filter(df, x > 2)
+```
+
+Explicitly include NA
+
+```{r}
+filter(df, is.na(x) | x > 2)
+```
+
+## 5.2.4 Exercises
+
+Flights that had an arrival delay of two or more hours
+
+```{r}
+filter(flights, arr_delay >= 2)
+```
+
+Flights that flew to Houston
+```{r}
+filter(flights, dest %in% c("IAH", "HOU"))
+```
+
+Flights that were operated by United, American or Delta
+
+```{r}
+filter(flights, carrier %in% c("UA", "AA", "DL"))
+```
+
